@@ -3,11 +3,24 @@
 require "bundler/setup"
 Bundler.setup
 
-require "rspec-sidekiq_pro"
+require "active_support/core_ext/numeric/time"
+require "active_support"
+require "rspec/sidekiq_pro"
+require "super_diff/rspec" if ENV["SUPER_DIFF"]
+require "timecop"
 
 RSpec.configure do |config|
-  config.order = "random"
   config.expect_with :rspec do |expect|
     expect.syntax = :expect
+    expect.max_formatted_output_length = 1024
+  end
+
+  config.before do
+    Sidekiq::Queues.clear_all
+  end
+
+  config.after do
+    Sidekiq::Queues.clear_all
+    Timecop.return
   end
 end

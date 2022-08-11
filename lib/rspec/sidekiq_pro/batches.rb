@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
-module Rspec
+module RSpec
   module SidekiqPro
-    VERSION = "0.0.0"
+    module Batches
+      # TODO
+    end
   end
 end

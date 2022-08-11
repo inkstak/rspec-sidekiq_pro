@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
 $:.push File.expand_path("lib", __dir__)
-require "rspec-sidekiq_pro/version"
+require "rspec/sidekiq_pro/version"
 
 Gem::Specification.new do |s|
   s.name     = "rspec-sidekiq_pro"
-  s.version  = Rspec::SidekiqPro::VERSION
+  s.version  = RSpec::SidekiqPro::VERSION
 
   s.authors = ["Savater Sebastien"]
   s.email   = "github.60k5k@simplelogin.co"
@@ -17,14 +17,8 @@ Gem::Specification.new do |s|
   s.files         = Dir["lib/**/*"] + %w[LICENSE README.md]
   s.require_paths = ["lib"]
 
-  s.add_development_dependency "bundler"
-  s.add_development_dependency "gem-release"
-  s.add_development_dependency "rake"
-  s.add_development_dependency "rspec"
-  s.add_development_dependency "rubocop"
-  s.add_development_dependency "rubocop-rake"
-  s.add_development_dependency "rubocop-rspec"
-  s.add_development_dependency "rubocop-performance"
-  s.add_development_dependency "standard"
-  s.add_development_dependency "zeitwerk"
+  s.add_dependency "activesupport", ">= 6.0", "< 8"
+  s.add_dependency "rspec",         "~> 3.11"
+  s.add_dependency "sidekiq",       "~> 6.5"
+  s.add_dependency "sidekiq-pro",   "~> 5.5"
 end
