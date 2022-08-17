@@ -17,10 +17,12 @@ RSpec.configure do |config|
 
   config.before do
     Sidekiq::Queues.clear_all
+    RSpec::SidekiqPro::Batches.clear_all
   end
 
   config.after do
     Sidekiq::Queues.clear_all
+    RSpec::SidekiqPro::Batches.clear_all
     Timecop.return
   end
 end

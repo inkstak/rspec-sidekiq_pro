@@ -3,50 +3,77 @@
 module RSpec
   module SidekiqPro
     module Batches
-      class << self
-        delegate :size, :first, :last, to: :batches_array
-        delegate :fetch, to: :batches_hash
+      module Props
+        class << self
+          delegate :size, :first, :last, :each, :empty?, :any?, :none?, to: :batches_array
+          delegate :fetch, to: :batches_hash
 
-        def [](key)
-          if key.is_a?(Numeric)
-            batches_array[key]
-          else
-            batches_hash[key]
+          def [](key)
+            if key.is_a?(Numeric)
+              batches_array[key]
+            else
+              batches_hash[key]
+            end
+          end
+
+          def []=(bid, batch)
+            batch["bid"] = bid
+            batches_array << batch
+            batches_hash[bid] = batch
+          end
+
+          def delete(bid)
+            batch = batches_hash.delete(bid)
+            batches_array.delete(batch)
+          end
+
+          def clear_all
+            batches_array.clear
+            batches_hash.clear
+          end
+
+          def to_a
+            batches_array
+          end
+
+          def to_h
+            batches_hash
+          end
+
+          private
+
+          def batches_array
+            @batches_array ||= []
+          end
+
+          def batches_hash
+            @batches_hash ||= {}
+          end
+        end
+      end
+
+      class << self
+        delegate :size, :delete, :clear_all, :empty?, :any?, :none?, to: Props
+        delegate_missing_to :each
+
+        def each
+          return to_enum(:each) unless block_given?
+
+          Props.each do |props|
+            yield Sidekiq::Batch.new(props["bid"])
           end
         end
 
-        def []=(bid, batch)
-          batch["bid"] = bid
-          batches_array << batch
-          batches_hash[bid] = batch
+        def [](key)
+          Sidekiq::Batch.new(Props[key]["bid"])
         end
 
-        def delete(bid)
-          batch = batches_hash.delete(bid)
-          batches_array.delete(batch)
+        def first
+          Sidekiq::Batch.new(Props.first["bid"])
         end
 
-        def clear_all
-          batches_array.clear
-          batches_hash.clear
-        end
-
-        def to_a
-          batches_array
-        end
-
-        def to_h
-          batches_hash
-        end
-
-        private
-
-        def batches_array
-          @batches_array ||= []
-        end
-
-        def batches_hash
-          @batches_hash ||= {}
+        def last
+          Sidekiq::Batch.new(Props.last["bid"])
         end
       end
     end
@@ -60,7 +87,7 @@ module Sidekiq
         super
       else
         @bid  = bid || SecureRandom.urlsafe_base64(10)
-        props = RSpec::SidekiqPro::Batches.fetch(bid, {})
+        props = RSpec::SidekiqPro::Batches::Props.fetch(bid, {})
 
         @created_at  = props.fetch("created_at", Time.now.utc).to_f
         @description = props["description"]
@@ -92,7 +119,7 @@ module Sidekiq
     def invalidate_all
       return super if Sidekiq::Testing.disabled?
 
-      RSpec::SidekiqPro::Batches[bid]["invalidated"] = true
+      RSpec::SidekiqPro::Batches::Props[bid]["invalidated"] = true
       Sidekiq::Queues.jobs_by_queue.each_value { |jobs| jobs.delete_if { |job| include?(job["jid"]) } }
       Sidekiq::Queues.jobs_by_class.each_value { |jobs| jobs.delete_if { |job| include?(job["jid"]) } }
     end
@@ -106,7 +133,7 @@ module Sidekiq
     def invalidated?
       return super if Sidekiq::Testing.disabled?
 
-      !!RSpec::SidekiqPro::Batches[bid]["invalidated"]
+      !!RSpec::SidekiqPro::Batches::Props[bid]["invalidated"]
     end
 
     def jobs(&block)
@@ -117,7 +144,7 @@ module Sidekiq
       if mutable?
         @parent_bid = Thread.current[:sidekiq_batch]&.bid
 
-        RSpec::SidekiqPro::Batches[bid] = {
+        RSpec::SidekiqPro::Batches::Props[bid] = {
           "created_at" => created_at,
           "description" => description,
           "parent" => parent_bid,
@@ -136,7 +163,7 @@ module Sidekiq
         Thread.current[:sidekiq_batch] = parent
       end
 
-      RSpec::SidekiqPro::Batches[bid]["jids"] = @jids
+      RSpec::SidekiqPro::Batches::Props[bid]["jids"] = @jids
     end
 
     def register(jid)
@@ -166,7 +193,7 @@ module Sidekiq
           super
         else
           @bid      = bid
-          @props    = RSpec::SidekiqPro::Batches.fetch(bid, {})
+          @props    = RSpec::SidekiqPro::Batches::Props.fetch(bid, {})
           @pending  = 0
           @failures = 0
           @total    = @props.fetch("jids", []).size
