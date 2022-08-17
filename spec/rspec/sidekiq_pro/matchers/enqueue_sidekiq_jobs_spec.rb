@@ -232,10 +232,10 @@ RSpec.describe RSpec::SidekiqPro::Matchers::EnqueueSidekiqJobs do
         }.to enqueue_sidekiq_jobs(SampleJob).at(5.minutes.from_now)
       }.to raise_error(RSpec::Expectations::ExpectationNotMetError).with_message(<<~MESSAGE.strip)
         expected to enqueue SampleJob job
-          at:        2022-08-10 00:05:00 +0200
+          at:        #{Time.parse("2022-08-10 00:05:00")}
 
         found 1 SampleJob:
-          at:        2022-08-10 00:05:01 +0200
+          at:        #{Time.parse("2022-08-10 00:05:01")}
       MESSAGE
     end
 
@@ -246,10 +246,10 @@ RSpec.describe RSpec::SidekiqPro::Matchers::EnqueueSidekiqJobs do
         }.to enqueue_sidekiq_jobs(SampleJob).in(10.minutes)
       }.to raise_error(RSpec::Expectations::ExpectationNotMetError).with_message(<<~MESSAGE.strip)
         expected to enqueue SampleJob job
-          in:        10 minutes (2022-08-10 00:10:00 +0200)
+          in:        10 minutes (#{Time.parse("2022-08-10 00:10:00")})
 
         found 1 SampleJob:
-          at:        2022-08-10 00:05:00 +0200
+          at:        #{Time.parse("2022-08-10 00:05:00")}
       MESSAGE
     end
 
@@ -260,10 +260,10 @@ RSpec.describe RSpec::SidekiqPro::Matchers::EnqueueSidekiqJobs do
         }.to enqueue_sidekiq_jobs(SampleJob).at(10.minutes.from_now)
       }.to raise_error(RSpec::Expectations::ExpectationNotMetError).with_message(<<~MESSAGE.strip)
         expected to enqueue SampleJob job
-          at:        2022-08-10 00:10:00 +0200
+          at:        #{Time.parse("2022-08-10 00:10:00")}
 
         found 1 SampleJob:
-          at:        2022-08-10 00:05:00 +0200
+          at:        #{Time.parse("2022-08-10 00:05:00")}
       MESSAGE
     end
 
@@ -287,10 +287,10 @@ RSpec.describe RSpec::SidekiqPro::Matchers::EnqueueSidekiqJobs do
           }.not_to enqueue_sidekiq_jobs(SampleJob).in(5.minutes)
         }.to raise_error(RSpec::Expectations::ExpectationNotMetError).with_message(<<~MESSAGE.strip)
           expected not to enqueue SampleJob job
-            in:        5 minutes (2022-08-10 00:05:00 +0200)
+            in:        5 minutes (#{Time.parse("2022-08-10 00:05:00")})
 
           found 1 SampleJob:
-            at:        2022-08-10 00:05:00 +0200
+            at:        #{Time.parse("2022-08-10 00:05:00")}
         MESSAGE
       end
 
@@ -301,10 +301,10 @@ RSpec.describe RSpec::SidekiqPro::Matchers::EnqueueSidekiqJobs do
           }.not_to enqueue_sidekiq_jobs(SampleJob).at(5.minutes.from_now)
         }.to raise_error(RSpec::Expectations::ExpectationNotMetError).with_message(<<~MESSAGE.strip)
           expected not to enqueue SampleJob job
-            at:        2022-08-10 00:05:00 +0200
+            at:        #{Time.parse("2022-08-10 00:05:00")}
 
           found 1 SampleJob:
-            at:        2022-08-10 00:05:00 +0200
+            at:        #{Time.parse("2022-08-10 00:05:00")}
         MESSAGE
       end
     end
@@ -397,17 +397,17 @@ RSpec.describe RSpec::SidekiqPro::Matchers::EnqueueSidekiqJobs do
         expected to enqueue SampleJob job
           exactly:   3 time(s)
           arguments: [1]
-          in:        15 minutes (2022-08-10 00:15:00 +0200)
+          in:        15 minutes (#{Time.parse("2022-08-10 00:15:00")})
 
         found 4 SampleJob:
           - arguments: [2]
-            at:        2022-08-10 00:15:00 +0200
+            at:        #{Time.parse("2022-08-10 00:15:00")}
           - arguments: [1]
-            at:        2022-08-10 00:15:00 +0200
+            at:        #{Time.parse("2022-08-10 00:15:00")}
           - arguments: [1]
-            at:        2022-08-10 00:15:00 +0200
+            at:        #{Time.parse("2022-08-10 00:15:00")}
           - arguments: [1]
-            at:        2022-08-10 00:10:00 +0200
+            at:        #{Time.parse("2022-08-10 00:10:00")}
       MESSAGE
     end
   end
