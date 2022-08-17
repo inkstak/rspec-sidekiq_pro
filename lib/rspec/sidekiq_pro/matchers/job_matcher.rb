@@ -199,7 +199,7 @@ module RSpec
         def filter_jobs(jobs)
           jobs.select do |job|
             next if expected_arguments && !values_match?(expected_arguments, job["args"])
-            next if expected_schedule && !values_match?(expected_schedule, job["at"])
+            next if expected_schedule && !values_match?(expected_schedule.to_i, job["at"].to_i)
             next if expected_without_batch && job["bid"]
             next if expected_batch && !batch_match?(expected_batch, job["bid"])
 

@@ -217,6 +217,28 @@ RSpec.describe RSpec::SidekiqPro::Matchers::EnqueueSidekiqJobs do
       }.to enqueue_sidekiq_jobs(SampleJob).at(5.minutes.from_now)
     end
 
+    it "asserts that schedule match the same second" do
+      expect {
+        Timecop.travel(0.05.seconds.from_now)
+        SampleJob.perform_in(5.minutes)
+      }.to enqueue_sidekiq_jobs(SampleJob).at(5.minutes.from_now)
+    end
+
+    it "fails assertion when one second elasped" do
+      expect {
+        expect {
+          Timecop.travel(1.05.seconds.from_now)
+          SampleJob.perform_in(5.minutes)
+        }.to enqueue_sidekiq_jobs(SampleJob).at(5.minutes.from_now)
+      }.to raise_error(RSpec::Expectations::ExpectationNotMetError).with_message(<<~MESSAGE.strip)
+        expected to enqueue SampleJob job
+          at:        2022-08-10 00:05:00 +0200
+
+        found 1 SampleJob:
+          at:        2022-08-10 00:05:01 +0200
+      MESSAGE
+    end
+
     it "fails assertion when no jobs is enqueued in expected interval" do
       expect {
         expect {
