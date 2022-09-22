@@ -14,7 +14,7 @@ bundle add rspec-sidekiq_pro --group=test
 
 `rspec/sidekiq_pro` requires `sidekiq/testing` by default so there is no need to include it.
 
-It also mean that Sidekiq in set to `fake` mode by default. Take a look at [Sidekiq wiki](https://github.com/mperham/sidekiq/wiki/Testing) for more details.
+It also means that Sidekiq in set to `fake` mode by default. Take a look at [Sidekiq wiki](https://github.com/mperham/sidekiq/wiki/Testing) for more details.
 
 If you wish to start each spec without enqueued jobs or batches:
 

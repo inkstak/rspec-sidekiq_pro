@@ -8,6 +8,9 @@ require "active_support"
 require "rspec/sidekiq_pro"
 require "super_diff/rspec" if ENV["SUPER_DIFF"]
 require "timecop"
+require "simplecov"
+require "simplecov_json_formatter"
+SimpleCov.start
 
 RSpec.configure do |config|
   config.expect_with :rspec do |expect|

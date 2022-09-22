@@ -16,11 +16,9 @@ on:
 jobs:
   rspec:
     runs-on: ubuntu-latest
-
     strategy:
       matrix:
         ruby-version: ['2.7', '3.0', head, jruby, jruby-head, truffleruby, truffleruby-head]
-
     env:
       BUNDLE_GEMS__CONTRIBSYS__COM: ${{ secrets.BUNDLE_GEMS__CONTRIBSYS__COM }}
 
@@ -31,8 +29,15 @@ jobs:
       with:
         ruby-version: ${{ matrix.ruby-version }}
         bundler-cache: true
+
     - name: Run tests
-      run: bundle exec rspec
+      run: CC_TEST_REPORTER_ID=1 bundle exec rspec
+
+    - name: Publish code coverage
+      if: ${{ success() && env.CC_TEST_REPORTER_ID }}
+      uses: paambaati/codeclimate-action@v2.7.5
+      env:
+        CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
 
   rubocop:
     runs-on: ubuntu-latest
