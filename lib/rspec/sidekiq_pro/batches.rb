@@ -86,15 +86,15 @@ module Sidekiq
       if Sidekiq::Testing.disabled?
         super
       else
-        @bid  = bid || SecureRandom.urlsafe_base64(10)
+        @bid = bid || SecureRandom.urlsafe_base64(10)
         props = RSpec::SidekiqPro::Batches::Props.fetch(bid, {})
 
-        @created_at  = props.fetch("created_at", Time.now.utc).to_f
+        @created_at = props.fetch("created_at", Time.now.utc).to_f
         @description = props["description"]
-        @parent_bid  = props["parent"]
-        @callbacks   = props.fetch("callbacks", {})
-        @jids        = props.fetch("jids", [])
-        @mutable     = props.empty?
+        @parent_bid = props["parent"]
+        @callbacks = props.fetch("callbacks", {})
+        @jids = props.fetch("jids", [])
+        @mutable = props.empty?
       end
     end
 
@@ -179,8 +179,8 @@ module Sidekiq
         callback.each do |target, options|
           klass_name, method = target.to_s.split("#")
           klass = klass_name.constantize
-          meth  = method || "on_#{event}"
-          inst  = klass.new
+          meth = method || "on_#{event}"
+          inst = klass.new
           inst.jid = SecureRandom.hex(12) if inst.respond_to?(:jid)
           inst.send(meth, status, options)
         end
@@ -192,11 +192,11 @@ module Sidekiq
         if Sidekiq::Testing.disabled?
           super
         else
-          @bid      = bid
-          @props    = RSpec::SidekiqPro::Batches::Props.fetch(bid, {})
-          @pending  = 0
+          @bid = bid
+          @props = RSpec::SidekiqPro::Batches::Props.fetch(bid, {})
+          @pending = 0
           @failures = 0
-          @total    = @props.fetch("jids", []).size
+          @total = @props.fetch("jids", []).size
         end
       end
     end

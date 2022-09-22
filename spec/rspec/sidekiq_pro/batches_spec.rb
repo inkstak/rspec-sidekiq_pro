@@ -27,25 +27,25 @@ RSpec.describe RSpec::SidekiqPro::Batches do
 
   it "allows to return first batch" do
     expect(described_class.first)
-      .to  be_a(Sidekiq::Batch)
+      .to be_a(Sidekiq::Batch)
       .and have_attributes("bid" => bids.first)
   end
 
   it "allows to return last batch" do
     expect(described_class.last)
-      .to  be_a(Sidekiq::Batch)
+      .to be_a(Sidekiq::Batch)
       .and have_attributes("bid" => bids.last)
   end
 
   it "allows to find a batch by BID" do
     expect(described_class[bids[1]])
-      .to  be_a(Sidekiq::Batch)
+      .to be_a(Sidekiq::Batch)
       .and have_attributes("bid" => bids[1])
   end
 
   it "allows to find a batch" do
     expect(described_class.find { |batch| batch.description == "Batch #2" })
-      .to  be_a(Sidekiq::Batch)
+      .to be_a(Sidekiq::Batch)
       .and have_attributes("bid" => bids[2])
   end
 

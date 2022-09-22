@@ -17,12 +17,6 @@ AllCops:
     - '**/tmp/**/*'
     - '**/vendor/**/*'
 
-Layout/ExtraSpacing:
-  AllowForAlignment: true
-
-Layout/SpaceInsideHashLiteralBraces:
-  EnforcedStyle: space
-
 RSpec/ExampleLength:
   Enabled: false
 

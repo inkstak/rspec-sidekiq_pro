@@ -14,7 +14,7 @@ RSpec.describe RSpec::SidekiqPro::Matchers::HaveEnqueuedSidekiqJobs do
   end
 
   before do
-    stub_const("SampleJob",  Class.new(sample_job_class))
+    stub_const("SampleJob", Class.new(sample_job_class))
     stub_const("SampleJob2", Class.new(sample_job_class))
 
     Timecop.freeze("2022-08-10 00:00:00")
@@ -327,7 +327,7 @@ RSpec.describe RSpec::SidekiqPro::Matchers::HaveEnqueuedSidekiqJobs do
       SampleJob.perform_in(10.minutes, 4)
 
       expect(SampleJob)
-        .to  have_enqueued_sidekiq_jobs.exactly(7).times
+        .to have_enqueued_sidekiq_jobs.exactly(7).times
         .and have_enqueued_sidekiq_jobs.once.with(1)
         .and have_enqueued_sidekiq_jobs.exactly(3).times.with(2)
         .and have_enqueued_sidekiq_jobs.twice.with(3)

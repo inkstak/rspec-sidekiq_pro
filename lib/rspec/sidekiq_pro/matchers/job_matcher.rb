@@ -41,7 +41,7 @@ module RSpec
           raise "setting expecations with both `at` and `in` is not supported" if @expected_interval
 
           @expected_timestamp = timestamp
-          @expected_schedule  = timestamp.to_i
+          @expected_schedule = timestamp.to_i
           self
         end
 
@@ -85,7 +85,7 @@ module RSpec
         end
 
         def matches?(jobs)
-          @actual_jobs  = jobs
+          @actual_jobs = jobs
           filtered_jobs = filter_jobs(actual_jobs)
 
           if expected_count
@@ -96,7 +96,7 @@ module RSpec
         end
 
         def does_not_match?(jobs)
-          @actual_jobs  = jobs
+          @actual_jobs = jobs
           filtered_jobs = filter_jobs(actual_jobs)
 
           if expected_count
@@ -136,6 +136,9 @@ module RSpec
 
         def failure_message_diff
           diff = []
+
+          # rubocop:disable Layout/ExtraSpacing
+          # It becomes unreadable when not allowing alignement
           diff << "  exactly:   #{expected_count} time(s)"       if expected_count
           diff << "  arguments: #{expected_arguments}"           if expected_arguments
           diff << "  in:        #{expected_interval_output}"     if expected_interval
@@ -143,6 +146,7 @@ module RSpec
           diff << "  batch:     #{output_batch(expected_batch)}" if expected_batch
           diff << "  batch:     no batch"                        if expected_without_batch
           diff << "" if diff.any?
+          # rubocop:enable Layout/ExtraSpacing
 
           if actual_jobs.empty?
             diff << "no #{worker_class} found"
@@ -153,11 +157,15 @@ module RSpec
 
             actual_jobs.each do |job|
               job_message = []
+
+              # rubocop:disable Layout/ExtraSpacing
+              # It becomes unreadable when not allowing alignement
               job_message << "arguments: #{job["args"]}"                if expected_arguments
               job_message << "at:        #{output_schedule(job["at"])}" if expected_schedule && job["at"]
               job_message << "at:        no schedule"                   if expected_schedule && !job["at"]
               job_message << "batch:     #{output_batch(job["bid"])}"   if (expected_without_batch || expected_batch) && job["bid"]
               job_message << "batch:     no batch"                      if (expected_without_batch || expected_batch) && !job["bid"]
+              # rubocop:enable Layout/ExtraSpacing
 
               diff += job_message.map.with_index do |line, index|
                 if actual_jobs.size == 1
@@ -184,9 +192,12 @@ module RSpec
 
         def output_batch(value)
           case value
-          when :__undef__     then "to be present"
-          when String         then "<Sidekiq::Batch bid: #{value.inspect}>"
-          when Sidekiq::Batch then "<Sidekiq::Batch bid: #{value.bid.inspect}>"
+          when :__undef__
+            "to be present"
+          when String
+            "<Sidekiq::Batch bid: #{value.inspect}>"
+          when Sidekiq::Batch
+            "<Sidekiq::Batch bid: #{value.bid.inspect}>"
           else
             if value.respond_to?(:description)
               value.description
@@ -213,10 +224,8 @@ module RSpec
             !bid.nil?
           when String
             expected_batch == bid
-
           when ::Sidekiq::Batch
             expected_batch.bid == bid
-
           else
             return unless bid
 
