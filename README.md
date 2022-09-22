@@ -1,4 +1,4 @@
-# Rspec for Sidekiq Pro
+# RSpec for Sidekiq Pro
 
 [![Gem Version](https://badge.fury.io/rb/rspec-sidekiq_pro.svg)](https://rubygems.org/gems/rspec-sidekiq_pro)
 [![CI Status](https://github.com/inkstak/rspec-sidekiq_pro/actions/workflows/ci.yml/badge.svg)](https://github.com/inkstak/rspec-sidekiq_pro/actions/workflows/ci.yml)

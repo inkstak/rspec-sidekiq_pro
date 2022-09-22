@@ -24,6 +24,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+
     - name: Set up Ruby
       uses: ruby/setup-ruby@v1
       with:
@@ -41,16 +42,15 @@ jobs:
 
   rubocop:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        ruby-version: [ '3.0' ]
 
     steps:
     - uses: actions/checkout@v3
+
     - name: Set up Ruby
       uses: ruby/setup-ruby@v1
       with:
-        ruby-version: ${{ matrix.ruby-version }}
+        ruby-version: '3.0'
         bundler-cache: true
+
     - name: Run rubocop
       run: bundle exec rubocop
