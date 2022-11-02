@@ -2,7 +2,7 @@
 
 [![Gem Version](https://badge.fury.io/rb/rspec-sidekiq_pro.svg)](https://rubygems.org/gems/rspec-sidekiq_pro)
 [![CI Status](https://github.com/inkstak/rspec-sidekiq_pro/actions/workflows/ci.yml/badge.svg)](https://github.com/inkstak/rspec-sidekiq_pro/actions/workflows/ci.yml)
-[![Maintainability](https://api.codeclimate.com/v1/badges/9bb8b75ea8c66b1a9c94/maintainability)](https://codeclimate.com/github/inkstak/rspec-sidekiq_pro/maintainability)
+[![Maintainability](https://api.codeclimate.com/v1/badges/3de8ad4b1787cdb9ca20/maintainability)](https://codeclimate.com/github/inkstak/rspec-sidekiq_pro/maintainability)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/3de8ad4b1787cdb9ca20/test_coverage)](https://codeclimate.com/github/inkstak/rspec-sidekiq_pro/test_coverage)
 
 ### Installation
