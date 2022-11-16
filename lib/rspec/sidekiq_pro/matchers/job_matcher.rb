@@ -20,7 +20,6 @@ module RSpec
           if block
             raise ArgumentError, "setting block to `with` is not supported for this matcher" if supports_value_expectations?
             raise ArgumentError, "setting arguments and block together in `with` is not supported" if expected_arguments.any?
-
             @expected_arguments = block
           else
             @expected_arguments = normalize_arguments(expected_arguments)
@@ -135,52 +134,61 @@ module RSpec
         end
 
         def failure_message_diff
-          diff = []
+          message = []
+          message += expectations_in_failure_message
+          message << "" if message.any?
+          message << actual_jobs_size_in_failure_message
 
-          # rubocop:disable Layout/ExtraSpacing
-          # It becomes unreadable when not allowing alignement
-          diff << "  exactly:   #{expected_count} time(s)"       if expected_count
-          diff << "  arguments: #{expected_arguments}"           if expected_arguments
-          diff << "  in:        #{expected_interval_output}"     if expected_interval
-          diff << "  at:        #{expected_timestamp}"           if expected_timestamp
-          diff << "  batch:     #{output_batch(expected_batch)}" if expected_batch
-          diff << "  batch:     no batch"                        if expected_without_batch
-          diff << "" if diff.any?
-          # rubocop:enable Layout/ExtraSpacing
-
-          if actual_jobs.empty?
-            diff << "no #{worker_class} found"
-          elsif !expected_arguments && !expected_schedule && !expected_without_batch && !expected_batch
-            diff << "found #{actual_jobs.size} #{worker_class}"
-          else
-            diff << "found #{actual_jobs.size} #{worker_class}:"
+          if expected_arguments || expected_schedule || expected_without_batch || expected_batch
+            message[-1] = "#{message.last}:"
 
             actual_jobs.each do |job|
-              job_message = []
-
-              # rubocop:disable Layout/ExtraSpacing
-              # It becomes unreadable when not allowing alignement
-              job_message << "arguments: #{job["args"]}"                if expected_arguments
-              job_message << "at:        #{output_schedule(job["at"])}" if expected_schedule && job["at"]
-              job_message << "at:        no schedule"                   if expected_schedule && !job["at"]
-              job_message << "batch:     #{output_batch(job["bid"])}"   if (expected_without_batch || expected_batch) && job["bid"]
-              job_message << "batch:     no batch"                      if (expected_without_batch || expected_batch) && !job["bid"]
-              # rubocop:enable Layout/ExtraSpacing
-
-              diff += job_message.map.with_index do |line, index|
-                if actual_jobs.size == 1
-                  "  #{line}"
-                elsif index.zero?
-                  "  - #{line}"
-                else
-                  "    #{line}"
+              job_details_in_failure_message(job).each_with_index do |line, index|
+                if actual_jobs.size > 1 && index.zero?
+                  line = (+line).insert(2, "- ")
+                elsif actual_jobs.size > 1
+                  line = (+line).insert(2, "  ")
                 end
+
+                message << line
               end
             end
           end
 
-          diff.join("\n")
+          message.join("\n")
         end
+
+        def actual_jobs_size_in_failure_message
+          if actual_jobs.empty?
+            "no #{worker_class} found"
+          else
+            "found #{actual_jobs.size} #{worker_class}"
+          end
+        end
+
+        # rubocop:disable Layout/ExtraSpacing
+        # It becomes unreadable when not allowing alignement
+        def expectations_in_failure_message
+          message = []
+          message << "  exactly:   #{expected_count} time(s)"       if expected_count
+          message << "  arguments: #{expected_arguments}"           if expected_arguments
+          message << "  in:        #{expected_interval_output}"     if expected_interval
+          message << "  at:        #{expected_timestamp}"           if expected_timestamp
+          message << "  batch:     #{output_batch(expected_batch)}" if expected_batch
+          message << "  batch:     no batch"                        if expected_without_batch
+          message
+        end
+
+        def job_details_in_failure_message(job)
+          message = []
+          message << "  arguments: #{job["args"]}"                if expected_arguments
+          message << "  at:        #{output_schedule(job["at"])}" if expected_schedule && job["at"]
+          message << "  at:        no schedule"                   if expected_schedule && !job["at"]
+          message << "  batch:     #{output_batch(job["bid"])}"   if (expected_without_batch || expected_batch) && job["bid"]
+          message << "  batch:     no batch"                      if (expected_without_batch || expected_batch) && !job["bid"]
+          message
+        end
+        # rubocop:enable Layout/ExtraSpacing
 
         def expected_interval_output
           "#{expected_interval.inspect} (#{output_schedule(expected_schedule)})"
