@@ -54,3 +54,18 @@ jobs:
 
     - name: Run rubocop
       run: bundle exec rubocop
+
+  standardrb:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: '3.0'
+        bundler-cache: true
+
+    - name: Run standardb
+      run: bundle exec standardrb
