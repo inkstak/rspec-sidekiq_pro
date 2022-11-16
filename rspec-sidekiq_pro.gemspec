@@ -19,7 +19,7 @@ Gem::Specification.new do |s|
 
   s.add_dependency "activesupport", ">= 6.0", "< 8"
   s.add_dependency "rspec", "~> 3.11"
-  s.add_dependency "sidekiq", "~> 6.5"
-  s.add_dependency "sidekiq-pro", "~> 5.5"
+  s.add_dependency "sidekiq", ">= 6.5", "< 8"
+  s.add_dependency "sidekiq-pro", ">= 5.5", "< 8"
   s.add_dependency "zeitwerk", "~> 2.6"
 end
