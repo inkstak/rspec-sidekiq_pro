@@ -140,19 +140,8 @@ module RSpec
           message << actual_jobs_size_in_failure_message
 
           if expected_arguments || expected_schedule || expected_without_batch || expected_batch
-            message[-1] = "#{message.last}:"
-
-            actual_jobs.each do |job|
-              job_details_in_failure_message(job).each_with_index do |line, index|
-                if actual_jobs.size > 1 && index.zero?
-                  line = (+line).insert(2, "- ")
-                elsif actual_jobs.size > 1
-                  line = (+line).insert(2, "  ")
-                end
-
-                message << line
-              end
-            end
+            message[-1] = "#{message[-1]}:"
+            message += actual_jobs_details_in_failure_message
           end
 
           message.join("\n")
@@ -188,6 +177,21 @@ module RSpec
           message << "  batch:     no batch"                      if (expected_without_batch || expected_batch) && !job["bid"]
           message
         end
+
+        def actual_jobs_details_in_failure_message
+          actual_jobs.flat_map do |job|
+            job_details_in_failure_message(job).map.with_index do |line, index|
+              if actual_jobs.size > 1
+                indent = "    "
+                indent = "  - " if index.zero?
+                line = "#{indent}#{line[2..]}"
+              end
+
+              line
+            end
+          end
+        end
+
         # rubocop:enable Layout/ExtraSpacing
 
         def expected_interval_output
