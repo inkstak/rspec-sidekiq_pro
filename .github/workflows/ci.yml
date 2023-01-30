@@ -43,6 +43,9 @@ jobs:
   rubocop:
     runs-on: ubuntu-latest
 
+    env:
+      BUNDLE_GEMS__CONTRIBSYS__COM: ${{ secrets.BUNDLE_GEMS__CONTRIBSYS__COM }}
+
     steps:
     - uses: actions/checkout@v3
 
@@ -57,6 +60,9 @@ jobs:
 
   standardrb:
     runs-on: ubuntu-latest
+
+    env:
+      BUNDLE_GEMS__CONTRIBSYS__COM: ${{ secrets.BUNDLE_GEMS__CONTRIBSYS__COM }}
 
     steps:
     - uses: actions/checkout@v3
