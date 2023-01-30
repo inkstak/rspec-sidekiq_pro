@@ -3,14 +3,16 @@
 require "bundler/setup"
 Bundler.setup
 
+unless RUBY_ENGINE == "truffleruby"
+  require "simplecov"
+  SimpleCov.start
+end
+
 require "active_support/core_ext/numeric/time"
 require "active_support"
 require "rspec/sidekiq_pro"
-require "simplecov"
 require "super_diff/rspec" if ENV["SUPER_DIFF"]
 require "timecop"
-
-SimpleCov.start
 
 RSpec.configure do |config|
   config.expect_with :rspec do |expect|
