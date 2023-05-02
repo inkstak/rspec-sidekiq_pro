@@ -12,7 +12,8 @@ Gem::Specification.new do |s|
 
   s.homepage = "http://github.com/inkstak/rspec-sidekiq_pro"
   s.licenses = ["MIT"]
-  s.summary = "A collection of tools and matchers for Sidekiq Pro"
+  s.summary = "A collection of RSpec matchers for Sidekiq Pro"
+  s.description = "A collection of RSpec matchers for Sidekiq Pro"
 
   s.files = Dir["lib/**/*"] + %w[LICENSE README.md]
   s.require_paths = ["lib"]

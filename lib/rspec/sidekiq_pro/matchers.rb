@@ -18,12 +18,10 @@ module RSpec
       # expect(AwesomeWorker).to have_enqueued_sidekiq_job.in(5.minutes)
       #
       def have_enqueued_sidekiq_job
-        HaveEnqueuedSidekiqJobs.new.once
-      end
-
-      def have_enqueued_sidekiq_jobs
         HaveEnqueuedSidekiqJobs.new
       end
+
+      alias_method :have_enqueued_sidekiq_jobs, :have_enqueued_sidekiq_job
 
       # Checks if a certain job was enqueued in a block.
       #
@@ -37,12 +35,10 @@ module RSpec
       #   .to enqueue_sidekiq_job(AwesomeWorker).in(5.minutes)
       #
       def enqueue_sidekiq_job(worker_class)
-        EnqueueSidekiqJobs.new(worker_class).once
-      end
-
-      def enqueue_sidekiq_jobs(worker_class)
         EnqueueSidekiqJobs.new(worker_class)
       end
+
+      alias_method :enqueue_sidekiq_jobs, :enqueue_sidekiq_job
     end
   end
 end

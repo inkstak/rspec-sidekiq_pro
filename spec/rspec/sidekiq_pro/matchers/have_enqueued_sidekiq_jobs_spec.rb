@@ -20,54 +20,39 @@ RSpec.describe RSpec::SidekiqPro::Matchers::HaveEnqueuedSidekiqJobs do
     Timecop.freeze("2022-08-10 00:00:00")
   end
 
-  def create_worker_and_return_arguments
-    SampleJob.perform_async(1, 2, 3)
-    [1, 2, 3]
-  end
+  it "asserts that one job has been enqueued" do
+    SampleJob.perform_async
 
-  it "asserts that a job will be enqueued" do
-    SampleJob.perform_async
-    SampleJob.perform_async
-    expect(SampleJob).to have_enqueued_sidekiq_jobs
-  end
-
-  it "asserts that only one job will be enqueued" do
-    SampleJob.perform_async
     expect(SampleJob).to have_enqueued_sidekiq_job
+  end
+
+  it "asserts that at least one jobs have been enqueued" do
+    SampleJob.perform_async
+    SampleJob.perform_async
+
+    expect(SampleJob).to have_enqueued_sidekiq_job
+  end
+
+  it "asserts that some jobs have been enqueued using plural matcher" do
+    SampleJob.perform_async
+    SampleJob.perform_async
+
+    expect(SampleJob).to have_enqueued_sidekiq_jobs
   end
 
   it "fails assertion when no jobs match" do
     expect {
       SampleJob2.perform_async
       SampleJob2.perform_async
-      expect(SampleJob).to have_enqueued_sidekiq_jobs
+      expect(SampleJob).to have_enqueued_sidekiq_job
     }.to raise_error(RSpec::Expectations::ExpectationNotMetError).with_message(<<~MESSAGE.strip)
       expected to have enqueued SampleJob job
       no SampleJob found
     MESSAGE
   end
 
-  it "fails assertion when not only one job matches" do
-    expect {
-      SampleJob.perform_async
-      SampleJob.perform_async
-      expect(SampleJob).to have_enqueued_sidekiq_job
-    }.to raise_error(RSpec::Expectations::ExpectationNotMetError).with_message(<<~MESSAGE.strip)
-      expected to have enqueued SampleJob job
-        exactly:   1 time(s)
-
-      found 2 SampleJob
-    MESSAGE
-  end
-
   describe "negative matcher" do
     it "asserts that no jobs has been enqueued" do
-      SampleJob2.perform_async
-      SampleJob2.perform_async
-      expect(SampleJob).not_to have_enqueued_sidekiq_jobs
-    end
-
-    it "asserts that not only one job has been enqueued" do
       SampleJob2.perform_async
       SampleJob2.perform_async
       expect(SampleJob).not_to have_enqueued_sidekiq_job
@@ -77,7 +62,7 @@ RSpec.describe RSpec::SidekiqPro::Matchers::HaveEnqueuedSidekiqJobs do
       expect {
         SampleJob.perform_async
         SampleJob.perform_async
-        expect(SampleJob).not_to have_enqueued_sidekiq_jobs
+        expect(SampleJob).not_to have_enqueued_sidekiq_job
       }.to raise_error(RSpec::Expectations::ExpectationNotMetError).with_message(<<~MESSAGE.strip)
         expected not to have enqueued SampleJob job
         found 2 SampleJob
@@ -88,25 +73,25 @@ RSpec.describe RSpec::SidekiqPro::Matchers::HaveEnqueuedSidekiqJobs do
   describe "arguments matching" do
     it "asserts that arguments match" do
       SampleJob.perform_async(1, 2, 3)
-      expect(SampleJob).to have_enqueued_sidekiq_jobs.with(1, 2, 3)
+      expect(SampleJob).to have_enqueued_sidekiq_job.with(1, 2, 3)
     end
 
     it "assets that even not-normalized arguments match" do
       SampleJob.perform_async("foo")
-      expect(SampleJob).to have_enqueued_sidekiq_jobs.with(:foo)
+      expect(SampleJob).to have_enqueued_sidekiq_job.with(:foo)
     end
 
     it "asserts that arguments match against multiple jobs" do
       SampleJob.perform_async(1)
       SampleJob.perform_async(2)
       SampleJob.perform_async(3)
-      expect(SampleJob).to have_enqueued_sidekiq_jobs.with(3)
+      expect(SampleJob).to have_enqueued_sidekiq_job.with(3)
     end
 
     it "fails assertion when the enqueued job doesn't match expected arguments" do
       expect {
         SampleJob.perform_async(1, 2, 3)
-        expect(SampleJob).to have_enqueued_sidekiq_jobs.with(1)
+        expect(SampleJob).to have_enqueued_sidekiq_job.with(1)
       }.to raise_error(RSpec::Expectations::ExpectationNotMetError).with_message(<<~MESSAGE.strip)
         expected to have enqueued SampleJob job
           arguments: [1]
@@ -121,7 +106,7 @@ RSpec.describe RSpec::SidekiqPro::Matchers::HaveEnqueuedSidekiqJobs do
         SampleJob.perform_async(1)
         SampleJob.perform_async(2)
         SampleJob.perform_async(3)
-        expect(SampleJob).to have_enqueued_sidekiq_jobs.with(4)
+        expect(SampleJob).to have_enqueued_sidekiq_job.with(4)
       }.to raise_error(RSpec::Expectations::ExpectationNotMetError).with_message(<<~MESSAGE.strip)
         expected to have enqueued SampleJob job
           arguments: [4]
@@ -138,7 +123,7 @@ RSpec.describe RSpec::SidekiqPro::Matchers::HaveEnqueuedSidekiqJobs do
         SampleJob.perform_async(1)
         SampleJob.perform_async(2)
         SampleJob.perform_async(3)
-        expect(SampleJob).not_to have_enqueued_sidekiq_jobs.with(4)
+        expect(SampleJob).not_to have_enqueued_sidekiq_job.with(4)
       end
 
       it "fails when some arguments match" do
@@ -146,7 +131,7 @@ RSpec.describe RSpec::SidekiqPro::Matchers::HaveEnqueuedSidekiqJobs do
           SampleJob.perform_async(1)
           SampleJob.perform_async(2)
           SampleJob.perform_async(3)
-          expect(SampleJob).not_to have_enqueued_sidekiq_jobs.with(3)
+          expect(SampleJob).not_to have_enqueued_sidekiq_job.with(3)
         }.to raise_error(RSpec::Expectations::ExpectationNotMetError).with_message(<<~MESSAGE.strip)
           expected not to have enqueued SampleJob job
             arguments: [3]
@@ -162,7 +147,7 @@ RSpec.describe RSpec::SidekiqPro::Matchers::HaveEnqueuedSidekiqJobs do
     describe "using block" do
       it "raises an error when passing block to `with`" do
         expect {
-          expect(SampleJob).to have_enqueued_sidekiq_jobs.with { |value| "A" }
+          expect(SampleJob).to have_enqueued_sidekiq_job.with { |value| "A" }
         }.to raise_error(ArgumentError).with_message("setting block to `with` is not supported for this matcher")
       end
     end
@@ -171,25 +156,25 @@ RSpec.describe RSpec::SidekiqPro::Matchers::HaveEnqueuedSidekiqJobs do
   describe "schedule matching" do
     it "asserts that jobs will be enqueued in an interval" do
       SampleJob.perform_in(5.minutes)
-      expect(SampleJob).to have_enqueued_sidekiq_jobs.in(5.minutes)
+      expect(SampleJob).to have_enqueued_sidekiq_job.in(5.minutes)
     end
 
     it "asserts that jobs will be enqueued at a given time" do
       SampleJob.perform_in(5.minutes)
-      expect(SampleJob).to have_enqueued_sidekiq_jobs.at(5.minutes.from_now)
+      expect(SampleJob).to have_enqueued_sidekiq_job.at(5.minutes.from_now)
     end
 
     it "asserts that schedule match the same second" do
       SampleJob.perform_in(5.minutes)
       Timecop.travel(0.05.seconds.from_now)
-      expect(SampleJob).to have_enqueued_sidekiq_jobs.at(5.minutes.from_now)
+      expect(SampleJob).to have_enqueued_sidekiq_job.at(5.minutes.from_now)
     end
 
     it "fails assertion when one second elasped" do
       expect {
         SampleJob.perform_in(5.minutes)
         Timecop.travel(1.05.seconds.from_now)
-        expect(SampleJob).to have_enqueued_sidekiq_jobs.at(5.minutes.from_now)
+        expect(SampleJob).to have_enqueued_sidekiq_job.at(5.minutes.from_now)
       }.to raise_error(RSpec::Expectations::ExpectationNotMetError).with_message(<<~MESSAGE.strip)
         expected to have enqueued SampleJob job
           at:        #{Time.parse("2022-08-10 00:05:01")}
@@ -202,7 +187,7 @@ RSpec.describe RSpec::SidekiqPro::Matchers::HaveEnqueuedSidekiqJobs do
     it "fails assertion when no jobs is enqueued in expected interval" do
       expect {
         SampleJob.perform_in(5.minutes)
-        expect(SampleJob).to have_enqueued_sidekiq_jobs.in(10.minutes)
+        expect(SampleJob).to have_enqueued_sidekiq_job.in(10.minutes)
       }.to raise_error(RSpec::Expectations::ExpectationNotMetError).with_message(<<~MESSAGE.strip)
         expected to have enqueued SampleJob job
           in:        10 minutes (#{Time.parse("2022-08-10 00:10:00")})
@@ -215,7 +200,7 @@ RSpec.describe RSpec::SidekiqPro::Matchers::HaveEnqueuedSidekiqJobs do
     it "fails assertion when no jobs is enqueued at a given time" do
       expect {
         SampleJob.perform_in(5.minutes)
-        expect(SampleJob).to have_enqueued_sidekiq_jobs.at(10.minutes.from_now)
+        expect(SampleJob).to have_enqueued_sidekiq_job.at(10.minutes.from_now)
       }.to raise_error(RSpec::Expectations::ExpectationNotMetError).with_message(<<~MESSAGE.strip)
         expected to have enqueued SampleJob job
           at:        #{Time.parse("2022-08-10 00:10:00")}
@@ -228,18 +213,18 @@ RSpec.describe RSpec::SidekiqPro::Matchers::HaveEnqueuedSidekiqJobs do
     describe "negative matcher" do
       it "asserts that no jobs will be enqueued in an interval" do
         SampleJob.perform_in(5.minutes)
-        expect(SampleJob).not_to have_enqueued_sidekiq_jobs.in(10.minutes)
+        expect(SampleJob).not_to have_enqueued_sidekiq_job.in(10.minutes)
       end
 
       it "asserts that no jobs will be enqueued at a given time" do
         SampleJob.perform_in(5.minutes)
-        expect(SampleJob).not_to have_enqueued_sidekiq_jobs.at(10.minutes.from_now)
+        expect(SampleJob).not_to have_enqueued_sidekiq_job.at(10.minutes.from_now)
       end
 
       it "fails assertion when some jobs are enqueued in expected interval" do
         expect {
           SampleJob.perform_in(5.minutes)
-          expect(SampleJob).not_to have_enqueued_sidekiq_jobs.in(5.minutes)
+          expect(SampleJob).not_to have_enqueued_sidekiq_job.in(5.minutes)
         }.to raise_error(RSpec::Expectations::ExpectationNotMetError).with_message(<<~MESSAGE.strip)
           expected not to have enqueued SampleJob job
             in:        5 minutes (#{Time.parse("2022-08-10 00:05:00")})
@@ -252,7 +237,7 @@ RSpec.describe RSpec::SidekiqPro::Matchers::HaveEnqueuedSidekiqJobs do
       it "fails assertion when some jobs are enqueued at a given time" do
         expect {
           SampleJob.perform_in(5.minutes)
-          expect(SampleJob).not_to have_enqueued_sidekiq_jobs.at(5.minutes.from_now)
+          expect(SampleJob).not_to have_enqueued_sidekiq_job.at(5.minutes.from_now)
         }.to raise_error(RSpec::Expectations::ExpectationNotMetError).with_message(<<~MESSAGE.strip)
           expected not to have enqueued SampleJob job
             at:        #{Time.parse("2022-08-10 00:05:00")}
@@ -267,26 +252,26 @@ RSpec.describe RSpec::SidekiqPro::Matchers::HaveEnqueuedSidekiqJobs do
   describe "counting jobs" do
     it "asserts that only one job will be enqueued" do
       SampleJob.perform_async
-      expect(SampleJob).to have_enqueued_sidekiq_jobs.once
+      expect(SampleJob).to have_enqueued_sidekiq_job.once
     end
 
     it "asserts that only two jobs will be enqueued" do
       SampleJob.perform_async
       SampleJob.perform_async
-      expect(SampleJob).to have_enqueued_sidekiq_jobs.twice
+      expect(SampleJob).to have_enqueued_sidekiq_job.twice
     end
 
     it "asserts that an exact number of jobs will be enqueued" do
       SampleJob.perform_async
       SampleJob.perform_async
-      expect(SampleJob).to have_enqueued_sidekiq_jobs.exactly(2).times
+      expect(SampleJob).to have_enqueued_sidekiq_job.exactly(2).times
     end
 
     it "fails assertions when expecting only one job" do
       expect {
         SampleJob.perform_async
         SampleJob.perform_async
-        expect(SampleJob).to have_enqueued_sidekiq_jobs.once
+        expect(SampleJob).to have_enqueued_sidekiq_job.once
       }.to raise_error(RSpec::Expectations::ExpectationNotMetError).with_message(<<~MESSAGE.strip)
         expected to have enqueued SampleJob job
           exactly:   1 time(s)
@@ -298,7 +283,7 @@ RSpec.describe RSpec::SidekiqPro::Matchers::HaveEnqueuedSidekiqJobs do
     it "fails assertions when expecting only two job" do
       expect {
         SampleJob.perform_async
-        expect(SampleJob).to have_enqueued_sidekiq_jobs.twice
+        expect(SampleJob).to have_enqueued_sidekiq_job.twice
       }.to raise_error(RSpec::Expectations::ExpectationNotMetError).with_message(<<~MESSAGE.strip)
         expected to have enqueued SampleJob job
           exactly:   2 time(s)
@@ -311,7 +296,7 @@ RSpec.describe RSpec::SidekiqPro::Matchers::HaveEnqueuedSidekiqJobs do
       expect {
         SampleJob.perform_async
         SampleJob.perform_async
-        expect(SampleJob).to have_enqueued_sidekiq_jobs.exactly(3).times
+        expect(SampleJob).to have_enqueued_sidekiq_job.exactly(3).times
       }.to raise_error(RSpec::Expectations::ExpectationNotMetError).with_message(<<~MESSAGE.strip)
         expected to have enqueued SampleJob job
           exactly:   3 time(s)
@@ -327,10 +312,10 @@ RSpec.describe RSpec::SidekiqPro::Matchers::HaveEnqueuedSidekiqJobs do
       SampleJob.perform_in(10.minutes, 4)
 
       expect(SampleJob)
-        .to have_enqueued_sidekiq_jobs.exactly(7).times
-        .and have_enqueued_sidekiq_jobs.once.with(1)
-        .and have_enqueued_sidekiq_jobs.exactly(3).times.with(2)
-        .and have_enqueued_sidekiq_jobs.twice.with(3)
+        .to have_enqueued_sidekiq_job.exactly(7).times
+        .and have_enqueued_sidekiq_job.once.with(1)
+        .and have_enqueued_sidekiq_job.exactly(3).times.with(2)
+        .and have_enqueued_sidekiq_job.twice.with(3)
     end
 
     it "fails assertion when none of the jobs matches expectations" do
@@ -339,7 +324,7 @@ RSpec.describe RSpec::SidekiqPro::Matchers::HaveEnqueuedSidekiqJobs do
         SampleJob.perform_in(15.minutes, 1)
         SampleJob.perform_in(15.minutes, 1)
         SampleJob.perform_in(10.minutes, 1)
-        expect(SampleJob).to have_enqueued_sidekiq_jobs.exactly(3).times.with(1).in(15.minutes)
+        expect(SampleJob).to have_enqueued_sidekiq_job.exactly(3).times.with(1).in(15.minutes)
       }.to raise_error(RSpec::Expectations::ExpectationNotMetError).with_message(<<~MESSAGE.strip)
         expected to have enqueued SampleJob job
           exactly:   3 time(s)
@@ -363,7 +348,7 @@ RSpec.describe RSpec::SidekiqPro::Matchers::HaveEnqueuedSidekiqJobs do
     it "asserts that a job is not included in a batch" do
       SampleJob.perform_async
 
-      expect(SampleJob).to have_enqueued_sidekiq_jobs.without_batch
+      expect(SampleJob).to have_enqueued_sidekiq_job.without_batch
     end
 
     it "asserts that jobs is included in a batch" do
@@ -371,7 +356,7 @@ RSpec.describe RSpec::SidekiqPro::Matchers::HaveEnqueuedSidekiqJobs do
       batch.jobs do
         SampleJob.perform_async
       end
-      expect(SampleJob).to have_enqueued_sidekiq_jobs.within_batch
+      expect(SampleJob).to have_enqueued_sidekiq_job.within_batch
     end
 
     it "asserts that jobs is included in an expected batch" do
@@ -379,7 +364,7 @@ RSpec.describe RSpec::SidekiqPro::Matchers::HaveEnqueuedSidekiqJobs do
       batch.jobs do
         SampleJob.perform_async
       end
-      expect(SampleJob).to have_enqueued_sidekiq_jobs.within_batch(batch)
+      expect(SampleJob).to have_enqueued_sidekiq_job.within_batch(batch)
     end
 
     it "asserts that jobs is included in a batch with a given BID" do
@@ -387,7 +372,7 @@ RSpec.describe RSpec::SidekiqPro::Matchers::HaveEnqueuedSidekiqJobs do
       batch.jobs do
         SampleJob.perform_async
       end
-      expect(SampleJob).to have_enqueued_sidekiq_jobs.within_batch(batch.bid)
+      expect(SampleJob).to have_enqueued_sidekiq_job.within_batch(batch.bid)
     end
 
     it "asserts that jobs is included in a batch that matches assertion" do
@@ -395,7 +380,7 @@ RSpec.describe RSpec::SidekiqPro::Matchers::HaveEnqueuedSidekiqJobs do
       batch.jobs do
         SampleJob.perform_async
       end
-      expect(SampleJob).to have_enqueued_sidekiq_jobs.within_batch(have_attributes(bid: batch.bid))
+      expect(SampleJob).to have_enqueued_sidekiq_job.within_batch(have_attributes(bid: batch.bid))
     end
 
     it "fails assertion when jobs is included in a batch" do
@@ -403,7 +388,7 @@ RSpec.describe RSpec::SidekiqPro::Matchers::HaveEnqueuedSidekiqJobs do
 
       expect {
         batch.jobs { SampleJob.perform_async }
-        expect(SampleJob).to have_enqueued_sidekiq_jobs.without_batch
+        expect(SampleJob).to have_enqueued_sidekiq_job.without_batch
       }.to raise_error(RSpec::Expectations::ExpectationNotMetError).with_message(<<~MESSAGE.strip)
         expected to have enqueued SampleJob job
           batch:     no batch
@@ -416,7 +401,7 @@ RSpec.describe RSpec::SidekiqPro::Matchers::HaveEnqueuedSidekiqJobs do
     it "fails assertion when jobs is not included in a batch" do
       expect {
         SampleJob.perform_async
-        expect(SampleJob).to have_enqueued_sidekiq_jobs.within_batch
+        expect(SampleJob).to have_enqueued_sidekiq_job.within_batch
       }.to raise_error(RSpec::Expectations::ExpectationNotMetError).with_message(<<~MESSAGE.strip)
         expected to have enqueued SampleJob job
           batch:     to be present
@@ -432,7 +417,7 @@ RSpec.describe RSpec::SidekiqPro::Matchers::HaveEnqueuedSidekiqJobs do
 
       expect {
         batch1.jobs { SampleJob.perform_async }
-        expect(SampleJob).to have_enqueued_sidekiq_jobs.within_batch(batch2)
+        expect(SampleJob).to have_enqueued_sidekiq_job.within_batch(batch2)
       }.to raise_error(RSpec::Expectations::ExpectationNotMetError).with_message(<<~MESSAGE.strip)
         expected to have enqueued SampleJob job
           batch:     <Sidekiq::Batch bid: "#{batch2.bid}">
@@ -447,7 +432,7 @@ RSpec.describe RSpec::SidekiqPro::Matchers::HaveEnqueuedSidekiqJobs do
 
       expect {
         batch.jobs { SampleJob.perform_async }
-        expect(SampleJob).to have_enqueued_sidekiq_jobs.within_batch("U2wgz8cxxTUdqg")
+        expect(SampleJob).to have_enqueued_sidekiq_job.within_batch("U2wgz8cxxTUdqg")
       }.to raise_error(RSpec::Expectations::ExpectationNotMetError).with_message(<<~MESSAGE.strip)
         expected to have enqueued SampleJob job
           batch:     <Sidekiq::Batch bid: "U2wgz8cxxTUdqg">
@@ -486,7 +471,7 @@ RSpec.describe RSpec::SidekiqPro::Matchers::HaveEnqueuedSidekiqJobs do
           SampleJob.perform_async
           SampleJob.perform_async
         end
-        expect(SampleJob).to have_enqueued_sidekiq_jobs.within_batch(have_attributes(bid: "U2wgz8cxxTUdqg"))
+        expect(SampleJob).to have_enqueued_sidekiq_job.within_batch(have_attributes(bid: "U2wgz8cxxTUdqg"))
       }.to raise_error(RSpec::Expectations::ExpectationNotMetError).with_message(expected_message)
     end
   end
