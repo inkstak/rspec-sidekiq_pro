@@ -12,7 +12,7 @@ RSpec.describe RSpec::SidekiqPro::Batches do
   let!(:bids) do
     stub_const("SampleJob", Class.new(sample_job_class))
 
-    4.times.map do |index|
+    Array.new(4) do |index|
       batch = Sidekiq::Batch.new
       batch.description = "Batch ##{index}"
       batch.jobs { SampleJob.perform_async }
