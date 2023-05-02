@@ -89,7 +89,7 @@ module Sidekiq
         @bid = bid || SecureRandom.urlsafe_base64(10)
         props = RSpec::SidekiqPro::Batches::Props.fetch(bid, {})
 
-        @created_at = props.fetch("created_at", Time.now.utc).to_f
+        @created_f = @created_at = props.fetch("created_at", Time.now.utc).to_f
         @description = props["description"]
         @parent_bid = props["parent"]
         @callbacks = props.fetch("callbacks", {})
