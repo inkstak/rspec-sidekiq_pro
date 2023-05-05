@@ -297,65 +297,331 @@ RSpec.describe RSpec::SidekiqPro::Matchers::EnqueueSidekiqJobs do
   end
 
   describe "counting jobs" do
-    it "asserts that only one job will be enqueued" do
-      expect {
-        SampleJob.perform_async
-      }.to enqueue_sidekiq_job(SampleJob).once
-    end
-
-    it "asserts that only two jobs will be enqueued" do
-      expect {
-        SampleJob.perform_async
-        SampleJob.perform_async
-      }.to enqueue_sidekiq_job(SampleJob).twice
-    end
-
-    it "asserts that an exact number of jobs will be enqueued" do
-      expect {
-        SampleJob.perform_async
-        SampleJob.perform_async
-      }.to enqueue_sidekiq_job(SampleJob).exactly(2).times
-    end
-
-    it "fails assertions when expecting only one job" do
-      expect {
+    describe "#once" do
+      it "asserts that only one job will be enqueued" do
         expect {
-          SampleJob.perform_async
           SampleJob.perform_async
         }.to enqueue_sidekiq_job(SampleJob).once
-      }.to raise_error(RSpec::Expectations::ExpectationNotMetError).with_message(<<~MESSAGE.strip)
-        expected to enqueue SampleJob job
-          exactly:   1 time(s)
+      end
 
-        found 2 SampleJob
-      MESSAGE
+      it "asserts that not only one job will be enqueued" do
+        expect {
+          SampleJob.perform_async
+          SampleJob.perform_async
+        }.not_to enqueue_sidekiq_job(SampleJob).once
+      end
+
+      it "fails assertions when expecting only one job" do
+        expect {
+          expect {
+            SampleJob.perform_async
+            SampleJob.perform_async
+          }.to enqueue_sidekiq_job(SampleJob).once
+        }.to raise_error(RSpec::Expectations::ExpectationNotMetError).with_message(<<~MESSAGE.strip)
+          expected to enqueue SampleJob job
+            exactly:   1 time(s)
+
+          found 2 SampleJob
+        MESSAGE
+      end
+
+      it "fails assertions when not expecting only one job" do
+        expect {
+          expect {
+            SampleJob.perform_async
+          }.not_to enqueue_sidekiq_job(SampleJob).once
+        }.to raise_error(RSpec::Expectations::ExpectationNotMetError).with_message(<<~MESSAGE.strip)
+          expected not to enqueue SampleJob job
+            exactly:   1 time(s)
+
+          found 1 SampleJob
+        MESSAGE
+      end
     end
 
-    it "fails assertions when expecting only two job" do
-      expect {
+    describe "#twice" do
+      it "asserts that only two jobs will be enqueued" do
         expect {
+          SampleJob.perform_async
           SampleJob.perform_async
         }.to enqueue_sidekiq_job(SampleJob).twice
-      }.to raise_error(RSpec::Expectations::ExpectationNotMetError).with_message(<<~MESSAGE.strip)
-        expected to enqueue SampleJob job
-          exactly:   2 time(s)
+      end
 
-        found 1 SampleJob
-      MESSAGE
+      it "asserts that not only two jobs will be enqueued" do
+        expect {
+          SampleJob.perform_async
+        }.not_to enqueue_sidekiq_job(SampleJob).twice
+      end
+
+      it "fails assertions when expecting only two job" do
+        expect {
+          expect {
+            SampleJob.perform_async
+          }.to enqueue_sidekiq_job(SampleJob).twice
+        }.to raise_error(RSpec::Expectations::ExpectationNotMetError).with_message(<<~MESSAGE.strip)
+          expected to enqueue SampleJob job
+            exactly:   2 time(s)
+
+          found 1 SampleJob
+        MESSAGE
+      end
+
+      it "fails assertions when not expecting only two job" do
+        expect {
+          expect {
+            SampleJob.perform_async
+            SampleJob.perform_async
+          }.not_to enqueue_sidekiq_job(SampleJob).twice
+        }.to raise_error(RSpec::Expectations::ExpectationNotMetError).with_message(<<~MESSAGE.strip)
+          expected not to enqueue SampleJob job
+            exactly:   2 time(s)
+
+          found 2 SampleJob
+        MESSAGE
+      end
     end
 
-    it "fails assertions when expecting an exact number of jobs" do
-      expect {
+    describe "#exactly" do
+      it "asserts that an exact number of jobs will be enqueued" do
         expect {
           SampleJob.perform_async
           SampleJob.perform_async
-        }.to enqueue_sidekiq_job(SampleJob).exactly(3).times
-      }.to raise_error(RSpec::Expectations::ExpectationNotMetError).with_message(<<~MESSAGE.strip)
-        expected to enqueue SampleJob job
-          exactly:   3 time(s)
+        }.to enqueue_sidekiq_job(SampleJob).exactly(2).times
+      end
 
-        found 2 SampleJob
-      MESSAGE
+      it "asserts that an exact number of job won't be enqueued" do
+        expect {
+          SampleJob.perform_async
+        }.not_to enqueue_sidekiq_job(SampleJob).exactly(2).times
+      end
+
+      it "fails assertions when expecting an exact number of jobs" do
+        expect {
+          expect {
+            SampleJob.perform_async
+            SampleJob.perform_async
+          }.to enqueue_sidekiq_job(SampleJob).exactly(3).times
+        }.to raise_error(RSpec::Expectations::ExpectationNotMetError).with_message(<<~MESSAGE.strip)
+          expected to enqueue SampleJob job
+            exactly:   3 time(s)
+
+          found 2 SampleJob
+        MESSAGE
+      end
+
+      it "fails assertions when expecting a different number of jobs" do
+        expect {
+          expect {
+            SampleJob.perform_async
+            SampleJob.perform_async
+            SampleJob.perform_async
+          }.not_to enqueue_sidekiq_job(SampleJob).exactly(3).times
+        }.to raise_error(RSpec::Expectations::ExpectationNotMetError).with_message(<<~MESSAGE.strip)
+          expected not to enqueue SampleJob job
+            exactly:   3 time(s)
+
+          found 3 SampleJob
+        MESSAGE
+      end
+    end
+
+    describe "#at_least" do
+      it "asserts that a minimum number of jobs will be enqueued" do
+        expect {
+          SampleJob.perform_async
+          SampleJob.perform_async
+        }.to enqueue_sidekiq_job(SampleJob).at_least(2).times
+      end
+
+      it "asserts that more than the minimum number of jobs will be enqueued" do
+        expect {
+          SampleJob.perform_async
+          SampleJob.perform_async
+          SampleJob.perform_async
+        }.to enqueue_sidekiq_job(SampleJob).at_least(2).times
+      end
+
+      it "fails assertions when less than the minimum number of jobs will be enqueued" do
+        expect {
+          expect {
+            SampleJob.perform_async
+          }.to enqueue_sidekiq_job(SampleJob).at_least(2).times
+        }.to raise_error(RSpec::Expectations::ExpectationNotMetError).with_message(<<~MESSAGE.strip)
+          expected to enqueue SampleJob job
+            at least:  2 time(s)
+
+          found 1 SampleJob
+        MESSAGE
+      end
+
+      it "doens't handle negative match" do
+        expect {
+          expect {
+            SampleJob.perform_async
+            SampleJob.perform_async
+            SampleJob.perform_async
+          }.not_to enqueue_sidekiq_job(SampleJob).at_least(2).times
+        }.to raise_error(ArgumentError).with_message(<<~MESSAGE.strip)
+          ambiguous `at_least` matcher used with negative form
+        MESSAGE
+      end
+    end
+
+    describe "#at_most" do
+      it "asserts that a maximum number of jobs will be enqueued" do
+        expect {
+          SampleJob.perform_async
+          SampleJob.perform_async
+        }.to enqueue_sidekiq_job(SampleJob).at_most(2).times
+      end
+
+      it "asserts that less than the maximum number of jobs will be enqueued" do
+        expect {
+          SampleJob.perform_async
+        }.to enqueue_sidekiq_job(SampleJob).at_most(2).times
+      end
+
+      it "fails assertions when more than the maximum number of jobs will be enqueued" do
+        expect {
+          expect {
+            SampleJob.perform_async
+            SampleJob.perform_async
+            SampleJob.perform_async
+          }.to enqueue_sidekiq_job(SampleJob).at_most(2).times
+        }.to raise_error(RSpec::Expectations::ExpectationNotMetError).with_message(<<~MESSAGE.strip)
+          expected to enqueue SampleJob job
+            at most:   2 time(s)
+
+          found 3 SampleJob
+        MESSAGE
+      end
+
+      it "doens't handle negative match" do
+        expect {
+          expect {
+            SampleJob.perform_async
+            SampleJob.perform_async
+            SampleJob.perform_async
+          }.not_to enqueue_sidekiq_job(SampleJob).at_most(2).times
+        }.to raise_error(ArgumentError).with_message(<<~MESSAGE.strip)
+          ambiguous `at_most` matcher used with negative form
+        MESSAGE
+      end
+    end
+
+    describe "#more_than" do
+      it "asserts that more than the minimum number of jobs will be enqueued" do
+        expect {
+          SampleJob.perform_async
+          SampleJob.perform_async
+          SampleJob.perform_async
+        }.to enqueue_sidekiq_job(SampleJob).more_than(2).times
+      end
+
+      it "asserts that no more than the maximum number of jobs will be enqueued" do
+        expect {
+          SampleJob.perform_async
+        }.not_to enqueue_sidekiq_job(SampleJob).more_than(2).times
+      end
+
+      it "fails assertions when the exact minimum number of jobs will be enqueued" do
+        expect {
+          expect {
+            SampleJob.perform_async
+            SampleJob.perform_async
+          }.to enqueue_sidekiq_job(SampleJob).more_than(2).times
+        }.to raise_error(RSpec::Expectations::ExpectationNotMetError).with_message(<<~MESSAGE.strip)
+          expected to enqueue SampleJob job
+            more than: 2 time(s)
+
+          found 2 SampleJob
+        MESSAGE
+      end
+
+      it "fails assertions when less than the minimum number of jobs will be enqueued" do
+        expect {
+          expect {
+            SampleJob.perform_async
+          }.to enqueue_sidekiq_job(SampleJob).more_than(2).times
+        }.to raise_error(RSpec::Expectations::ExpectationNotMetError).with_message(<<~MESSAGE.strip)
+          expected to enqueue SampleJob job
+            more than: 2 time(s)
+
+          found 1 SampleJob
+        MESSAGE
+      end
+
+      it "fails assertions when no more than the maximum number of jobs will be enqueued" do
+        expect {
+          expect {
+            SampleJob.perform_async
+            SampleJob.perform_async
+          }.not_to enqueue_sidekiq_job(SampleJob).more_than(2).times
+        }.to raise_error(RSpec::Expectations::ExpectationNotMetError).with_message(<<~MESSAGE.strip)
+          expected not to enqueue SampleJob job
+            more than: 2 time(s)
+
+          found 2 SampleJob
+        MESSAGE
+      end
+    end
+
+    describe "#less_than" do
+      it "asserts that more less the maximum number of jobs will be enqueued" do
+        expect {
+          SampleJob.perform_async
+        }.to enqueue_sidekiq_job(SampleJob).less_than(2).times
+      end
+
+      it "asserts that no more than the maximum number of jobs will be enqueued" do
+        expect {
+          SampleJob.perform_async
+          SampleJob.perform_async
+          SampleJob.perform_async
+        }.not_to enqueue_sidekiq_job(SampleJob).less_than(2).times
+      end
+
+      it "fails assertions when the exact minimum number of jobs will be enqueued" do
+        expect {
+          expect {
+            SampleJob.perform_async
+            SampleJob.perform_async
+          }.to enqueue_sidekiq_job(SampleJob).less_than(2).times
+        }.to raise_error(RSpec::Expectations::ExpectationNotMetError).with_message(<<~MESSAGE.strip)
+          expected to enqueue SampleJob job
+            less than: 2 time(s)
+
+          found 2 SampleJob
+        MESSAGE
+      end
+
+      it "fails assertions when more than the maximum number of jobs will be enqueued" do
+        expect {
+          expect {
+            SampleJob.perform_async
+            SampleJob.perform_async
+            SampleJob.perform_async
+          }.to enqueue_sidekiq_job(SampleJob).less_than(2).times
+        }.to raise_error(RSpec::Expectations::ExpectationNotMetError).with_message(<<~MESSAGE.strip)
+          expected to enqueue SampleJob job
+            less than: 2 time(s)
+
+          found 3 SampleJob
+        MESSAGE
+      end
+
+      it "fails assertions when no less than the minimum number of jobs will be enqueued" do
+        expect {
+          expect {
+            SampleJob.perform_async
+          }.not_to enqueue_sidekiq_job(SampleJob).less_than(2).times
+        }.to raise_error(RSpec::Expectations::ExpectationNotMetError).with_message(<<~MESSAGE.strip)
+          expected not to enqueue SampleJob job
+            less than: 2 time(s)
+
+          found 1 SampleJob
+        MESSAGE
+      end
     end
   end
 

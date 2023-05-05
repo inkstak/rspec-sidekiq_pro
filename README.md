@@ -55,7 +55,11 @@ Both matchers provide the same chainable methods:
 * `.with`
 * `.once`
 * `.twice`
-* `.exactly().times`
+* `.exactly(n).times`
+* `.more_than(n).times`
+* `.less_than(n).times`
+* `.at_least(n).times`
+* `.at_most(n).times`
 * `.in`
 * `.at`
 * `.within_batch`
@@ -100,6 +104,14 @@ it do
   expect { 
     3.times { SampleJob.perform_async }
   }.to enqueue_sidekiq_job(SampleJob).exactly(3).times
+end
+```
+
+```ruby
+it do
+  expect {
+    10.times { SampleJob.perform_async }
+  }.to enqueue_sidekiq_job(SampleJob).more_than(5).times
 end
 ```
 

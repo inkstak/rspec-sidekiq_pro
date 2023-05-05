@@ -12,6 +12,10 @@ module RSpec
           :expected_timestamp,
           :expected_schedule,
           :expected_count,
+          :expected_least_count,
+          :expected_most_count,
+          :expected_more_count,
+          :expected_less_count,
           :expected_without_batch,
           :expected_batch,
           :actual_jobs
@@ -52,8 +56,28 @@ module RSpec
           exactly(2)
         end
 
-        def exactly(times)
-          @expected_count = times
+        def exactly(count)
+          @expected_count = count
+          self
+        end
+
+        def at_least(count)
+          @expected_least_count = count
+          self
+        end
+
+        def at_most(count)
+          @expected_most_count = count
+          self
+        end
+
+        def more_than(count)
+          @expected_more_count = count
+          self
+        end
+
+        def less_than(count)
+          @expected_less_count = count
           self
         end
 
@@ -89,6 +113,14 @@ module RSpec
 
           if expected_count
             filtered_jobs.count == expected_count
+          elsif expected_least_count
+            filtered_jobs.count >= expected_least_count
+          elsif expected_most_count
+            filtered_jobs.count <= expected_most_count
+          elsif expected_more_count
+            filtered_jobs.count > expected_more_count
+          elsif expected_less_count
+            filtered_jobs.count < expected_less_count
           else
             filtered_jobs.any?
           end
@@ -100,6 +132,14 @@ module RSpec
 
           if expected_count
             filtered_jobs.count != expected_count
+          elsif expected_least_count
+            raise ArgumentError, "ambiguous `at_least` matcher used with negative form"
+          elsif expected_most_count
+            raise ArgumentError, "ambiguous `at_most` matcher used with negative form"
+          elsif expected_more_count
+            filtered_jobs.count < expected_more_count
+          elsif expected_less_count
+            filtered_jobs.count > expected_less_count
           else
             filtered_jobs.empty?
           end
@@ -122,6 +162,14 @@ module RSpec
             description += " twice"
           elsif expected_count
             description += " #{expected_count} times"
+          elsif expected_least_count
+            description += " at least #{expected_least_count} times"
+          elsif expected_most_count
+            description += " at most #{expected_most_count} times"
+          elsif expected_more_count
+            description += " more than #{expected_more_count} times"
+          elsif expected_less_count
+            description += " less than #{expected_less_count} times"
           end
 
           if expected_arguments.is_a?(Proc)
@@ -160,6 +208,10 @@ module RSpec
         def expectations_in_failure_message
           message = []
           message << "  exactly:   #{expected_count} time(s)"       if expected_count
+          message << "  at least:  #{expected_least_count} time(s)" if expected_least_count
+          message << "  at most:   #{expected_most_count} time(s)"  if expected_most_count
+          message << "  more than: #{expected_more_count} time(s)"  if expected_more_count
+          message << "  less than: #{expected_less_count} time(s)"  if expected_less_count
           message << "  arguments: #{expected_arguments}"           if expected_arguments
           message << "  in:        #{expected_interval_output}"     if expected_interval
           message << "  at:        #{expected_timestamp}"           if expected_timestamp
