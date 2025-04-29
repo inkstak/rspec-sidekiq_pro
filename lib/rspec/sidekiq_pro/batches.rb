@@ -124,12 +124,6 @@ module Sidekiq
       Sidekiq::Queues.jobs_by_class.each_value { |jobs| jobs.delete_if { |job| include?(job["jid"]) } }
     end
 
-    def invalidate_jids(*jids)
-      return super if Sidekiq::Testing.disabled?
-
-      # TODO
-    end
-
     def invalidated?
       return super if Sidekiq::Testing.disabled?
 
