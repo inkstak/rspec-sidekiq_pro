@@ -18,7 +18,7 @@ Gem::Specification.new do |s|
   s.files = Dir["lib/**/*"] + %w[LICENSE README.md]
   s.require_paths = ["lib"]
 
-  s.add_dependency "activesupport", ">= 6.0", "< 8"
+  s.add_dependency "activesupport", ">= 6.0", "< 9"
   s.add_dependency "rspec", "~> 3.11"
   s.add_dependency "sidekiq", ">= 6.5", "< 8"
   s.add_dependency "sidekiq-pro", ">= 5.5", "< 8"
