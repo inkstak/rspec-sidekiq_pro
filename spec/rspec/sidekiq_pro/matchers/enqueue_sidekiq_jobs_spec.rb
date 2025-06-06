@@ -778,10 +778,19 @@ RSpec.describe RSpec::SidekiqPro::Matchers::EnqueueSidekiqJobs do
       batch = Sidekiq::Batch.new
 
       expected_message =
-        if ENV["SUPER_DIFF"]
+        if defined?(SuperDiff)
           <<~MESSAGE.strip
             expected to enqueue SampleJob job
               batch:     have attributes (bid: "U2wgz8cxxTUdqg")
+
+            found 2 SampleJob:
+              - batch:     <Sidekiq::Batch bid: "#{batch.bid}">
+              - batch:     <Sidekiq::Batch bid: "#{batch.bid}">
+          MESSAGE
+        elsif Gem::Version.new(RUBY_VERSION) >= "3.4"
+          <<~MESSAGE.strip
+            expected to enqueue SampleJob job
+              batch:     have attributes {bid: "U2wgz8cxxTUdqg"}
 
             found 2 SampleJob:
               - batch:     <Sidekiq::Batch bid: "#{batch.bid}">

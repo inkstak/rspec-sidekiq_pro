@@ -11,7 +11,7 @@ end
 require "active_support/core_ext/numeric/time"
 require "active_support"
 require "rspec/sidekiq_pro"
-require "super_diff/rspec" if ENV["SUPER_DIFF"]
+require "super_diff/rspec" if ENV.fetch("SUPER_DIFF", "false") == "true"
 require "timecop"
 
 RSpec.configure do |config|
