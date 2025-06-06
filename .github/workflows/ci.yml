@@ -17,8 +17,9 @@ jobs:
   rspec:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
-        ruby-version: [ '2.7', '3.0', '3.1', '3.2', head, jruby, jruby-head, truffleruby, truffleruby-head ]
+        ruby-version: [ '3.1', '3.2', '3.3', '3.4', jruby, truffleruby ]
     env:
       BUNDLE_GEMS__CONTRIBSYS__COM: ${{ secrets.BUNDLE_GEMS__CONTRIBSYS__COM }}
 
@@ -35,7 +36,7 @@ jobs:
       run: CC_TEST_REPORTER_ID=1 bundle exec rspec
 
     - name: Publish code coverage
-      if: ${{ success() && env.CC_TEST_REPORTER_ID && matrix.ruby-version == '3.2' }}
+      if: ${{ success() && env.CC_TEST_REPORTER_ID && matrix.ruby-version == '3.4' }}
       uses: paambaati/codeclimate-action@v3.2.0
       env:
         CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
@@ -52,7 +53,7 @@ jobs:
     - name: Set up Ruby
       uses: ruby/setup-ruby@v1
       with:
-        ruby-version: '3.2'
+        ruby-version: '3.4'
         bundler-cache: true
 
     - name: Run rubocop
@@ -70,7 +71,7 @@ jobs:
     - name: Set up Ruby
       uses: ruby/setup-ruby@v1
       with:
-        ruby-version: '3.2'
+        ruby-version: '3.4'
         bundler-cache: true
 
     - name: Run standardb
