@@ -125,9 +125,8 @@ module Sidekiq
     end
 
     def invalidate_jids(*jids)
-      return super if Sidekiq::Testing.disabled?
-
       # TODO
+      # return super if Sidekiq::Testing.disabled?
     end
 
     def invalidated?
