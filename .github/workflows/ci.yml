@@ -17,8 +17,9 @@ jobs:
   rspec:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
-        ruby-version: [ '3.1', '3.2', '3.3', '3.4', head, jruby, jruby-head, truffleruby, truffleruby-head ]
+        ruby-version: [ '3.1', '3.2', '3.3', '3.4', jruby, truffleruby ]
     env:
       BUNDLE_GEMS__CONTRIBSYS__COM: ${{ secrets.BUNDLE_GEMS__CONTRIBSYS__COM }}
 
