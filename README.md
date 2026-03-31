@@ -14,9 +14,9 @@ bundle add rspec-sidekiq_pro --group=test
 
 ### Configuration
 
-`rspec/sidekiq_pro` requires `sidekiq/testing` by default so there is no need to include it.
-
-It also means that Sidekiq in set to `fake` mode by default. Take a look at [Sidekiq wiki](https://github.com/mperham/sidekiq/wiki/Testing) for more details.
+Sidekiq testing mode is set to `fake` by default by the gem.  
+You don't need to set it (or require `sidekiq/testing` prior to Sidekiq 8.1).  
+Take a look at [Sidekiq wiki](https://github.com/mperham/sidekiq/wiki/Testing) for more details.
 
 If you wish to start each spec without enqueued jobs or batches:
 
@@ -205,6 +205,12 @@ end
 bundle exec rspec
 bundle exec rubocop
 bundle exec standardrb
+```
+
+To run RSpec against various version of Sidekiq dependencies:
+```bash
+bundle exec appraisal install
+bundle exec appraisal rspec
 ```
 
 All of them can be run with:

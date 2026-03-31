@@ -7,12 +7,11 @@ require:
   - standard
 
 inherit_gem:
-  standard:
-    - config/base.yml
-    - config/ruby-3.3.yml
+  standard: config/base.yml
+  standard-performance: config/base.yml
 
 AllCops:
-  TargetRubyVersion: 3.4
+  TargetRubyVersion: 4.0
   NewCops: enable
   Exclude:
     - '**/tmp/**/*'
