@@ -7,7 +7,6 @@ gem "sidekiq-pro", source: "https://gems.contribsys.com"
 gemspec
 
 gem "appraisal"
-gem "bundler"
 gem "gem-release"
 gem "rake"
 gem "rspec"
