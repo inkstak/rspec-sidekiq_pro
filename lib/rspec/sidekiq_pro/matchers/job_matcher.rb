@@ -8,6 +8,7 @@ module RSpec
 
         attr_reader :worker_class,
           :expected_arguments,
+          :expected_without_argument,
           :expected_interval,
           :expected_timestamp,
           :expected_schedule,
@@ -21,6 +22,8 @@ module RSpec
           :actual_jobs
 
         def with(*expected_arguments, &block)
+          raise "setting expecations with both `with` and `without_argument` is not supported" if @expected_without_argument
+
           if block
             raise ArgumentError, "setting block to `with` is not supported for this matcher" if supports_value_expectations?
             raise ArgumentError, "setting arguments and block together in `with` is not supported" if expected_arguments.any?
@@ -29,6 +32,13 @@ module RSpec
             @expected_arguments = normalize_arguments(expected_arguments)
           end
 
+          self
+        end
+
+        def without_argument
+          raise "setting expecations with both `with` and `without_argument` is not supported" if @expected_arguments
+
+          @expected_without_argument = true
           self
         end
 
@@ -172,7 +182,9 @@ module RSpec
             description += " less than #{expected_less_count} times"
           end
 
-          if expected_arguments.is_a?(Proc)
+          if expected_without_argument
+            description += " without arguments"
+          elsif expected_arguments.is_a?(Proc)
             description += " with some arguments"
           elsif expected_arguments
             description += " with arguments #{expected_arguments}"
@@ -187,7 +199,7 @@ module RSpec
           message << "" if message.any?
           message << actual_jobs_size_in_failure_message
 
-          if expected_arguments || expected_schedule || expected_without_batch || expected_batch
+          if expected_arguments || expected_without_argument || expected_schedule || expected_without_batch || expected_batch
             message[-1] = "#{message[-1]}:"
             message += actual_jobs_details_in_failure_message
           end
@@ -213,6 +225,7 @@ module RSpec
           message << "  more than: #{expected_more_count} time(s)"  if expected_more_count
           message << "  less than: #{expected_less_count} time(s)"  if expected_less_count
           message << "  arguments: #{expected_arguments}"           if expected_arguments
+          message << "  arguments: no arguments"                    if expected_without_argument
           message << "  in:        #{expected_interval_output}"     if expected_interval
           message << "  at:        #{expected_timestamp}"           if expected_timestamp
           message << "  batch:     #{output_batch(expected_batch)}" if expected_batch
@@ -222,7 +235,8 @@ module RSpec
 
         def job_details_in_failure_message(job)
           message = []
-          message << "  arguments: #{job["args"]}"                if expected_arguments
+          message << "  arguments: #{job["args"]}"                if (expected_arguments || expected_without_argument) && job["args"].any?
+          message << "  arguments: no arguments"                  if (expected_arguments || expected_without_argument) && job["args"].empty?
           message << "  at:        #{output_schedule(job["at"])}" if expected_schedule && job["at"]
           message << "  at:        no schedule"                   if expected_schedule && !job["at"]
           message << "  batch:     #{output_batch(job["bid"])}"   if (expected_without_batch || expected_batch) && job["bid"]
@@ -274,6 +288,7 @@ module RSpec
         def filter_jobs(jobs)
           jobs.select do |job|
             next if expected_arguments && !values_match?(expected_arguments, job["args"])
+            next if expected_without_argument && job["args"].any?
             next if expected_schedule && !values_match?(expected_schedule.to_i, job["at"].to_i)
             next if expected_without_batch && job["bid"]
             next if expected_batch && !batch_match?(expected_batch, job["bid"])

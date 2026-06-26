@@ -53,6 +53,7 @@ end
 Both matchers provide the same chainable methods:
 
 * `.with`
+* `.without_argument`
 * `.once`
 * `.twice`
 * `.exactly(n).times`

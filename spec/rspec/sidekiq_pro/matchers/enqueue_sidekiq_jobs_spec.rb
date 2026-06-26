@@ -118,7 +118,7 @@ RSpec.describe RSpec::SidekiqPro::Matchers::EnqueueSidekiqJobs do
         expect {
           SampleJob.perform_async(1)
           SampleJob.perform_async(2)
-          SampleJob.perform_async(3)
+          SampleJob.perform_async
         }.to enqueue_sidekiq_job(SampleJob).with(4)
       }.to raise_error(RSpec::Expectations::ExpectationNotMetError).with_message(<<~MESSAGE.strip)
         expected to enqueue SampleJob job
@@ -127,8 +127,56 @@ RSpec.describe RSpec::SidekiqPro::Matchers::EnqueueSidekiqJobs do
         found 3 SampleJob:
           - arguments: [1]
           - arguments: [2]
-          - arguments: [3]
+          - arguments: no arguments
       MESSAGE
+    end
+
+    describe "#without_argument" do
+      it "asserts that jobs have no argument" do
+        expect {
+          SampleJob.perform_async
+        }.to enqueue_sidekiq_job(SampleJob).without_argument
+      end
+
+      it "asserts that one of the jobs match without arguments" do
+        expect {
+          SampleJob.perform_async(1)
+          SampleJob.perform_async
+          SampleJob.perform_async(2)
+        }.to enqueue_sidekiq_job(SampleJob).without_argument
+      end
+
+      it "fails assertion when the enqueued job have unexpected arguments" do
+        expect {
+          expect {
+            SampleJob.perform_async(1, 2, 3)
+          }.to enqueue_sidekiq_job(SampleJob).without_argument
+        }.to raise_error(RSpec::Expectations::ExpectationNotMetError).with_message(<<~MESSAGE.strip)
+          expected to enqueue SampleJob job
+            arguments: no arguments
+
+          found 1 SampleJob:
+            arguments: [1, 2, 3]
+        MESSAGE
+      end
+
+      it "fails assertion when none of the enqueued jobs match unexpected arguments" do
+        expect {
+          expect {
+            SampleJob.perform_async(1)
+            SampleJob.perform_async(2)
+            SampleJob.perform_async(3)
+          }.to enqueue_sidekiq_job(SampleJob).without_argument
+        }.to raise_error(RSpec::Expectations::ExpectationNotMetError).with_message(<<~MESSAGE.strip)
+          expected to enqueue SampleJob job
+            arguments: no arguments
+
+          found 3 SampleJob:
+            - arguments: [1]
+            - arguments: [2]
+            - arguments: [3]
+        MESSAGE
+      end
     end
 
     describe "negative matcher" do
