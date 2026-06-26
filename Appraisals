@@ -1,8 +1,5 @@
 # frozen_string_literal: true
 
-# Supported versions of Rails:
-# https://endoflife.date/rails
-#
 appraise "sidekiq-7.3" do
   gem "sidekiq", "~> 7.3.0"
 end
