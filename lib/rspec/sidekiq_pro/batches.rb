@@ -193,10 +193,18 @@ module Sidekiq
         else
           @bid = bid
           @props = RSpec::SidekiqPro::Batches::Props.fetch(bid, {})
-          @pending = 0
-          @failures = 0
           @total = @props.fetch("jids", []).size
+          @pending = @props.fetch("pending", @total)
+          @failures = @props.fetch("failures", 0)
         end
+      end
+
+      def pending=(count)
+        RSpec::SidekiqPro::Batches::Props[@bid]["pending"] = count
+      end
+
+      def failures=(count)
+        RSpec::SidekiqPro::Batches::Props[@bid]["failures"] = count
       end
     end
   end
