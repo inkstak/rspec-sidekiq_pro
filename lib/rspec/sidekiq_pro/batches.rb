@@ -206,6 +206,12 @@ module Sidekiq
       def failures=(count)
         RSpec::SidekiqPro::Batches::Props[@bid]["failures"] = count
       end
+
+      def dead?
+        return super if Sidekiq::Testing.disabled?
+
+        !!@props["dead"]
+      end
     end
   end
 end
