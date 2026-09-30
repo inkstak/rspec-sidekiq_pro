@@ -61,4 +61,21 @@ RSpec.describe RSpec::SidekiqPro::Batches do
     expect(described_class.size).to eq(0)
     expect(described_class).to be_empty
   end
+
+  describe Sidekiq::Batch::Status do
+    describe "#dead?" do
+      it "returns false by default" do
+        status = described_class.new(bids.first)
+
+        expect(status.dead?).to be(false)
+      end
+
+      it "returns true when the batch is flagged as dead" do
+        RSpec::SidekiqPro::Batches::Props[bids.first]["dead"] = true
+        status = described_class.new(bids.first)
+
+        expect(status.dead?).to be(true)
+      end
+    end
+  end
 end
